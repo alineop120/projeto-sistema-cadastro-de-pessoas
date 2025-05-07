@@ -27,7 +27,7 @@ public class UsuarioDAO {
                 usuario.setId(rs.getInt("id"));
                 usuario.setNome(rs.getString("nome"));
                 usuario.setEmail(rs.getString("email"));
-                usuario.setNivelAcesso(rs.getInt("nivel"));
+                usuario.setNivelAcesso(rs.getInt("acesso"));
                 
                 // Adicionando à lista
                 listaUsuarios.add(usuario);
@@ -44,7 +44,7 @@ public class UsuarioDAO {
 
     public void inserir(Usuario usuario) throws SQLException {
         try(Connection conn = ConnectionFactory.getConnection()){
-            PreparedStatement ps = conn.prepareStatement("insert into usuarios(nome,senha,email,nivel) values (?,?,?,?)");
+            PreparedStatement ps = conn.prepareStatement("insert into usuarios(nome,senha,email,acesso) values (?,?,?,?)");
             ps.setString(1, usuario.getNome());
             ps.setString(2, usuario.getSenha());
             ps.setString(3, usuario.getEmail());
@@ -69,16 +69,42 @@ public class UsuarioDAO {
             System.out.println(e.getMessage());
     	}
     }
-
     
-    public void deletar(int id) {
-        try (Connection conn = ConnectionFactory.getConnection()) {
-            PreparedStatement ps = conn.prepareStatement("delete from usuarios where id=?");
-            ps.setInt(1,id);
-            ps.executeUpdate();
+    public Usuario buscarPorId(int id) {
+    	Usuario usuario = null;
+    	String sql = "SELECT * FROM usuarios WHERE id = ?";
+
+    	try (Connection conexao = ConnectionFactory.getConnection();
+        PreparedStatement stmt = conexao.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+            	usuario = new Usuario();
+            	usuario.setId(rs.getInt("id"));
+            	usuario.setNome(rs.getString("nome"));
+            	usuario.setEmail(rs.getString("email"));
+            	usuario.setSenha(rs.getString("senha"));
+            	usuario.setNivelAcesso(rs.getInt("nivel"));
+            }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
+        return usuario;
     }
+    
+    public boolean deletar(int id) {
+        String sql = "DELETE FROM usuarios WHERE id = ?";
 
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, id);
+            int rowsAffected = stmt.executeUpdate();
+
+            return rowsAffected > 0;  // Retorna true se a exclusão foi bem-sucedida
+        } catch (SQLException e) {
+            return false;  // Retorna false em caso de erro
+        }
+    }
 }

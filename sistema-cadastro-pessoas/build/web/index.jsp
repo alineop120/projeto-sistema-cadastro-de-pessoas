@@ -6,6 +6,8 @@
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -18,7 +20,7 @@
     <h1 class="mb-4">Cadastro de Usuários</h1>
     
     <!-- Formulário para cadastro e edição -->
-    <form method="post" action="UsuarioController" class="form-group">
+    <form method="post" action="${ctx}/controller/UsuarioController" class="form-group">
         <input type="hidden" name="id" value="${usuario.id != null ? usuario.id : 0}"/>
 
         <div class="mb-3">
@@ -49,7 +51,7 @@
 
     <!-- Link para listar os usuários -->
     <div class="mt-3">
-        <a href="controller/UsuarioController?action=listar" class="btn btn-secondary">Listar Usuários</a>
+        <a href="${ctx}/controller/UsuarioController?action=listar" class="btn btn-secondary">Listar Usuários</a>
     </div>
 </body>
 </html>
