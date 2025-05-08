@@ -76,6 +76,9 @@
                 window.location.href = "${ctx}/controller/UsuarioController?action=deletar&id=" + id;
             }
         }
+        function alterarUsuario() {
+            window.location.href = "${ctx}/controller/UsuarioController?action=alterar&id=" + id;
+        }
     </script>
 </body>
 </html>

@@ -1,15 +1,14 @@
 package controller;
 
+import model.Usuario;
+import dao.UsuarioDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.*;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import model.Usuario;
-import dao.UsuarioDAO;
 import java.util.List;
 import javax.servlet.RequestDispatcher;
 
@@ -59,53 +58,50 @@ public class UsuarioController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-
         String action = request.getParameter("action");
-
-        if ("deletar".equals(action)) {
-            int id = Integer.parseInt(request.getParameter("id"));
-            UsuarioDAO usuarioDAO = new UsuarioDAO();
-
-            // Tenta deletar o usuário
-            boolean sucessoDeletar = usuarioDAO.deletar(id);
-
-            if (sucessoDeletar) {
-                request.setAttribute("msgSucesso", "Usuário deletado com sucesso!");
-            } else {
-                request.setAttribute("msgErro", "Erro ao tentar deletar o usuário.");
-            }
-
-            // Redireciona para a listagem após a exclusão
-            response.sendRedirect(request.getContextPath() + "/controller/UsuarioController?action=listar");
-
-        } else if ("alterar".equals(action)) {
-            int id = Integer.parseInt(request.getParameter("id"));
-            UsuarioDAO usuarioDAO = new UsuarioDAO();
-
-            // Verifica se o usuário existe
-            Usuario usuario = usuarioDAO.buscarPorId(id);
-
-            if (usuario != null) {
-                request.setAttribute("usuario", usuario);
-                RequestDispatcher dispatcher = request.getRequestDispatcher("/index.jsp");
-                dispatcher.forward(request, response);
-            } else {
-                // Caso o usuário não exista
-                response.sendError(HttpServletResponse.SC_NOT_FOUND, "Usuário não encontrado!");
-            }
-
-        } else {
-            UsuarioDAO usuarioDAO = new UsuarioDAO();
+        UsuarioDAO usuarioDAO = new UsuarioDAO();
+        int id = Integer.parseInt(request.getParameter("id"));
+                    
+        if (null == action) {
             List<Usuario> usuarios = usuarioDAO.listarTodos();
             request.setAttribute("usuarios", usuarios);
-
             // Verifica se há usuários cadastrados
-            if (usuarios.isEmpty()) {
+            if (usuarios.isEmpty()) 
+            {
                 request.setAttribute("msgErro", "Nenhum usuário cadastrado.");
             }
-
             RequestDispatcher dispatcher = request.getRequestDispatcher("/view/listaUsuarios.jsp");
             dispatcher.forward(request, response);
+        } 
+        else switch (action) {
+            case "deletar":
+                // Tenta deletar o usuário
+                boolean sucessoDeletar = usuarioDAO.deletar(id);
+                if (sucessoDeletar) {
+                    request.setAttribute("msgSucesso", "Usuário deletado com sucesso!");
+                }
+                else {
+                    request.setAttribute("msgErro", "Erro ao tentar deletar o usuário.");
+                }   // Redireciona para a listagem após a exclusão
+                response.sendRedirect(request.getContextPath() + "/controller/UsuarioController?action=listar");
+                break;
+            case "alterar":
+                // Verifica se o usuário existe
+                Usuario usuario = usuarioDAO.buscarPorId(id);
+                request.setAttribute("usuario", usuario);
+                RequestDispatcher rs = request.getRequestDispatcher("/index.jsp");
+                rs.forward(request, response);
+                break;
+            default:
+                List<Usuario> usuarios = usuarioDAO.listarTodos();
+                request.setAttribute("usuarios", usuarios);
+                // Verifica se há usuários cadastrados
+                if (usuarios.isEmpty())
+                {
+                    request.setAttribute("msgErro", "Nenhum usuário cadastrado.");
+                }   RequestDispatcher dispatcher = request.getRequestDispatcher("/view/listaUsuarios.jsp");
+                dispatcher.forward(request, response);
+                break;
         }
     }
 
@@ -123,23 +119,24 @@ public class UsuarioController extends HttpServlet {
         String nome = request.getParameter("nome");
     	String email = request.getParameter("email");
     	String senha = request.getParameter("senha");
-    	int nivelAcesso = Integer.parseInt(request.getParameter("nivel"));
-
-        Usuario usuario = new Usuario();
+    	int nivel = Integer.parseInt(request.getParameter("acesso"));
+        
+        Usuario u = new Usuario();
    	 
-    	usuario.setNome(nome);
-    	usuario.setSenha(senha);
-    	usuario.setEmail(email);
-    	usuario.setNivelAcesso(nivelAcesso);
+    	u.setNome(nome);
+    	u.setSenha(senha);
+    	u.setEmail(email);
+    	u.setNivelAcesso(nivel);
         
         UsuarioDAO uDAO = new UsuarioDAO();
-    	try {
-            uDAO.inserir(usuario);
-            System.out.println("Inserção realizada com sucesso");
-            response.sendRedirect(request.getContextPath() + "/controller/UsuarioController?action=listar");
-    	} catch (SQLException ex) {
-            System.out.println(ex.getMessage());
+    	if (Integer.parseInt(request.getParameter("id")) == 0){
+            uDAO.inserir(u);
+    	} else {
+            int id = Integer.parseInt(request.getParameter("id"));
+            u.setId(id);
+            uDAO.atualizar(u);
     	}
+        response.sendRedirect("./UsuarioController");
     }
 
     /**

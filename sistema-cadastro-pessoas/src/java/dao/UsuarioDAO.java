@@ -17,8 +17,9 @@ public class UsuarioDAO {
         
         // Conectando ao banco de dados
         try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement ps = conn.prepareStatement("SELECT * FROM usuarios");
-             ResultSet rs = ps.executeQuery()) {
+            PreparedStatement ps = conn.prepareStatement("SELECT * "
+                    + "FROM usuarios");
+            ResultSet rs = ps.executeQuery()) {
              
             // Iterando sobre o ResultSet
             while (rs.next()) {
@@ -42,9 +43,10 @@ public class UsuarioDAO {
         return listaUsuarios;
     }
 
-    public void inserir(Usuario usuario) throws SQLException {
+    public void inserir(Usuario usuario) {
         try(Connection conn = ConnectionFactory.getConnection()){
-            PreparedStatement ps = conn.prepareStatement("insert into usuarios(nome,senha,email,acesso) values (?,?,?,?)");
+            PreparedStatement ps = conn.prepareStatement("insert into "
+                    + "usuarios(nome,senha,email,acesso) values (?,?,?,?)");
             ps.setString(1, usuario.getNome());
             ps.setString(2, usuario.getSenha());
             ps.setString(3, usuario.getEmail());
@@ -58,7 +60,8 @@ public class UsuarioDAO {
 
     public void atualizar(Usuario usuario) throws SQLException {
     	try (Connection conn = ConnectionFactory.getConnection()) {
-            PreparedStatement ps = conn.prepareStatement("update usuarios set nome=?,senha=?,email=?,nivel=? where id=?");
+            PreparedStatement ps = conn.prepareStatement("update usuarios "
+                    + "set nome=?,senha=?,email=?,acesso=? where id=?");
             ps.setString(1, usuario.getNome());
             ps.setString(2, usuario.getSenha());
             ps.setString(3, usuario.getEmail());
@@ -85,7 +88,7 @@ public class UsuarioDAO {
             	usuario.setNome(rs.getString("nome"));
             	usuario.setEmail(rs.getString("email"));
             	usuario.setSenha(rs.getString("senha"));
-            	usuario.setNivelAcesso(rs.getInt("nivel"));
+            	usuario.setNivelAcesso(rs.getInt("acesso"));
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -97,7 +100,7 @@ public class UsuarioDAO {
         String sql = "DELETE FROM usuarios WHERE id = ?";
 
         try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, id);
             int rowsAffected = stmt.executeUpdate();
