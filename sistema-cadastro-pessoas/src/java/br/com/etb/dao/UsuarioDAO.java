@@ -4,6 +4,7 @@ import br.com.etb.model.Usuario;
 import br.com.etb.util.ConnectionFactory;
 import java.sql.*;
 import java.util.*;
+import org.mindrot.bcrypt.BCrypt;
 
 /**
  *
@@ -50,5 +51,101 @@ public class UsuarioDAO {
         }
 
         return usuarios;
+    }
+    
+    public void atualizar(Usuario usuario) {
+        String sql = "UPDATE usuarios SET nome = ?, senha = ?, email = ?, acesso = ? WHERE id = ?";
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            // Atualiza com senha nova criptografada
+            String senhaCriptografada = BCrypt.hashpw(usuario.getSenha(), BCrypt.gensalt());
+
+            ps.setString(1, usuario.getNome());
+            ps.setString(2, senhaCriptografada);
+            ps.setString(3, usuario.getEmail());
+            ps.setInt(4, usuario.getNivelAcesso());
+            ps.setInt(5, usuario.getId());
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println("Erro ao atualizar usuário: " + e.getMessage());
+        }
+    }
+    
+    public void alterar(Usuario usuario) {
+        atualizar(usuario); // Apenas chama o método existente
+    }
+
+    public boolean deletar(int id) {
+        String sql = "DELETE FROM usuarios WHERE id = ?";
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+            int resultado = ps.executeUpdate();
+            return resultado > 0;
+
+        } catch (SQLException e) {
+            System.out.println("Erro ao deletar usuário: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public Usuario buscarPorId(int id) {
+        String sql = "SELECT * FROM usuarios WHERE id = ?";
+        Usuario usuario = null;
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                usuario = new Usuario();
+                usuario.setId(rs.getInt("id"));
+                usuario.setNome(rs.getString("nome"));
+                usuario.setEmail(rs.getString("email"));
+                usuario.setSenha(rs.getString("senha"));
+                usuario.setNivelAcesso(rs.getInt("acesso"));
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Erro ao buscar usuário: " + e.getMessage());
+        }
+
+        return usuario;
+    }
+
+    public Usuario autenticar(String email, String senha) {
+        String sql = "SELECT * FROM usuarios WHERE email = ?";
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, email);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                String senhaHash = rs.getString("senha");
+
+                if (BCrypt.checkpw(senha, senhaHash)) {
+                    Usuario u = new Usuario();
+                    u.setId(rs.getInt("id"));
+                    u.setNome(rs.getString("nome"));
+                    u.setEmail(rs.getString("email"));
+                    u.setNivelAcesso(rs.getInt("acesso"));
+                    return u;
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Erro na autenticação: " + e.getMessage());
+        }
+
+        return null;
     }
 }
