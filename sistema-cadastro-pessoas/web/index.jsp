@@ -15,42 +15,46 @@
     
     <!-- Link do Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    
 </head>
 <body>
     <div class="container mt-5">
         <h2 class="text-center">Cadastro de Usuário</h2>
-        
-        <form action="UsuarioController" method="POST">
+
+        <form method="post" action="UsuarioController">
+            <input type="hidden" name="id" value="${usuario.id != null ? usuario.id : 0}"/>
+
             <!-- Nome -->
             <div class="mb-3">
                 <label for="nome" class="form-label">Nome</label>
-                <input type="text" class="form-control" id="nome" name="nome" required>
+                <input type="text" class="form-control" name="nome" value="${usuario.nome != null ? usuario.nome : ''}" required/>
             </div>
 
             <!-- Email -->
             <div class="mb-3">
                 <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" name="email" required>
+                <input type="email" class="form-control" name="email" value="${usuario.email != null ? usuario.email : ''}" required/>
             </div>
 
             <!-- Senha -->
             <div class="mb-3">
                 <label for="senha" class="form-label">Senha</label>
-                <input type="password" class="form-control" id="senha" name="senha" required>
+                <input type="password" class="form-control" name="senha" value="${usuario.senha != null ? usuario.senha : ''}" required/>
             </div>
 
             <!-- Nível de Acesso -->
             <div class="mb-3">
-                <label for="acesso" class="form-label">Nível de Acesso</label>
-                <select class="form-select" id="acesso" name="acesso" required>
-                    <option value="1">Usuário</option>
-                    <option value="2">Administrador</option>
+                <label for="nivel" class="form-label">Nível de Acesso</label>
+                <select class="form-select" name="nivel" required>
+                    <option value="1" ${usuario.nivel == 1 ? 'selected' : ''}>Admin</option>
+                    <option value="2" ${usuario.nivel == 2 ? 'selected' : ''}>Usuário</option>
                 </select>
             </div>
 
-            <!-- Botão de Cadastro -->
-            <button type="submit" class="btn btn-primary w-100">Cadastrar</button>
+            <!-- Botões Lado a Lado -->
+            <div class="d-flex justify-content-between">
+                <button type="submit" class="btn btn-primary w-48">Cadastrar</button>
+                <a href="UsuarioController?action=listar" class="btn btn-secondary w-48">Ver Lista de Usuários</a>
+            </div>
         </form>
     </div>
 
