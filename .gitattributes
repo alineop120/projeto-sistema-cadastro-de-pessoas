@@ -1,2 +1,27 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Ignora diretórios de build gerados automaticamente
+/build/
+/dist/
+/nbproject/private/
+/target/
+/out/
+
+# Ignora arquivos temporários e de log
+*.log
+*.class
+*.jar
+*.war
+*.tmp
+*.bak
+*.swp
+
+# Ignora arquivos de IDEs (NetBeans, IntelliJ, VSCode)
+*.iml
+.idea/
+.vscode/
+
+# Ignora arquivos de cache de sistema operacional
+.DS_Store
+Thumbs.db
