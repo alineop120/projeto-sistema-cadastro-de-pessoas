@@ -1,9 +1,10 @@
 package br.com.etb.dao;
 
-import br.com.etb.model.Usuario;
 import br.com.etb.util.ConnectionFactory;
+import br.com.etb.util.CriptografiaUtil;
 import java.sql.*;
 import java.util.*;
+import br.com.etb.model.Usuario;
 import org.mindrot.bcrypt.BCrypt;
 
 /**
@@ -11,23 +12,6 @@ import org.mindrot.bcrypt.BCrypt;
  * @author Aline
  */
 public class UsuarioDAO {
-
-    public void inserir(Usuario usuario) {
-        String sql = "INSERT INTO usuarios (nome, senha, email, acesso) VALUES (?, ?, ?, ?)";
-
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, usuario.getNome());
-            ps.setString(2, usuario.getSenha());
-            ps.setString(3, usuario.getEmail());
-            ps.setInt(4, usuario.getNivelAcesso());
-            ps.executeUpdate();
-
-        } catch (SQLException e) {
-            System.out.println("Erro ao inserir usuário: " + e.getMessage());
-        }
-    }
 
     public List<Usuario> listarTodos() {
         List<Usuario> usuarios = new ArrayList<>();
@@ -42,7 +26,7 @@ public class UsuarioDAO {
                 u.setId(rs.getInt("id"));
                 u.setNome(rs.getString("nome"));
                 u.setEmail(rs.getString("email"));
-                u.setNivelAcesso(rs.getInt("acesso"));
+                u.setNivelAcesso(rs.getInt("nivelAcesso"));
                 usuarios.add(u);
             }
 
@@ -53,8 +37,25 @@ public class UsuarioDAO {
         return usuarios;
     }
     
+    public void inserir(Usuario usuario) {
+        String sql = "INSERT INTO usuarios (nome, senha, email, nivelAcesso) VALUES (?, ?, ?, ?)";
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, usuario.getNome());
+            ps.setString(2, usuario.getSenha());
+            ps.setString(3, usuario.getEmail());
+            ps.setInt(4, usuario.getNivelAcesso());
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println("Erro ao inserir usuário: " + e.getMessage());
+        }
+    }
+    
     public void atualizar(Usuario usuario) {
-        String sql = "UPDATE usuarios SET nome = ?, senha = ?, email = ?, acesso = ? WHERE id = ?";
+        String sql = "UPDATE usuarios SET nome = ?, senha = ?, email = ?, nivelAcesso = ? WHERE id = ?";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -74,10 +75,6 @@ public class UsuarioDAO {
         }
     }
     
-    public void alterar(Usuario usuario) {
-        atualizar(usuario); // Apenas chama o método existente
-    }
-
     public boolean deletar(int id) {
         String sql = "DELETE FROM usuarios WHERE id = ?";
 
@@ -110,7 +107,7 @@ public class UsuarioDAO {
                 usuario.setNome(rs.getString("nome"));
                 usuario.setEmail(rs.getString("email"));
                 usuario.setSenha(rs.getString("senha"));
-                usuario.setNivelAcesso(rs.getInt("acesso"));
+                usuario.setNivelAcesso(rs.getInt("nivelAcesso"));
             }
 
         } catch (SQLException e) {
@@ -137,7 +134,7 @@ public class UsuarioDAO {
                     u.setId(rs.getInt("id"));
                     u.setNome(rs.getString("nome"));
                     u.setEmail(rs.getString("email"));
-                    u.setNivelAcesso(rs.getInt("acesso"));
+                    u.setNivelAcesso(rs.getInt("nivelAcesso"));
                     return u;
                 }
             }

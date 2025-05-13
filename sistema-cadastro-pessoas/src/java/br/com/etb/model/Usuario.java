@@ -12,8 +12,7 @@ public class Usuario {
     private int nivelAcesso;
 
     // Construtor
-    public Usuario() {
-    }
+    public Usuario() {}
     
     public Usuario(int id, String nome, String email, String senha,
             int nivelAcesso) {

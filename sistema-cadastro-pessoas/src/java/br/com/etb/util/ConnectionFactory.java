@@ -21,5 +21,5 @@ public class ConnectionFactory {
         catch (ClassNotFoundException e) {
             throw new SQLException("Driver JDBC não encontrado!", e);
     	}
-}
+    }
 }

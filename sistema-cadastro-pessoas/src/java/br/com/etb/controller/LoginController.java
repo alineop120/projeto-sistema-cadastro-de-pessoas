@@ -1,24 +1,29 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package br.com.etb.controller;
 
 import br.com.etb.dao.UsuarioDAO;
 import br.com.etb.model.Usuario;
-import br.com.etb.util.CriptografiaUtil;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.List;
+import java.sql.SQLException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 /**
  *
  * @author Aline
  */
-@WebServlet(urlPatterns = {"/UsuarioController"})
-public class UsuarioController extends HttpServlet {
+@WebServlet(name = "LoginController", urlPatterns = {"/LoginController"})
+public class LoginController extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -37,10 +42,10 @@ public class UsuarioController extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet UsuarioController</title>");            
+            out.println("<title>Servlet LoginController</title>");            
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet UsuarioController at " + request.getContextPath() + "</h1>");
+            out.println("<h1>Servlet LoginController at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
@@ -58,29 +63,7 @@ public class UsuarioController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String acao = request.getParameter("acao");
-        UsuarioDAO dao = new UsuarioDAO();
-
-        try {
-            if ("deletar".equals(acao)) {
-                int id = Integer.parseInt(request.getParameter("id"));
-                dao.deletar(id);
-                response.sendRedirect("listaUsuarios.jsp");
-            } else if ("editar".equals(acao)) {
-                int id = Integer.parseInt(request.getParameter("id"));
-                Usuario usuario = dao.buscarPorId(id);
-                request.setAttribute("usuario", usuario);
-                RequestDispatcher rd = request.getRequestDispatcher("index.jsp");
-                rd.forward(request, response);
-            } else {
-                List<Usuario> lista = dao.listarTodos();
-                request.setAttribute("usuarios", lista);
-                RequestDispatcher rd = request.getRequestDispatcher("listaUsuarios.jsp");
-                rd.forward(request, response);
-            }
-        } catch (Exception e) {
-            throw new ServletException(e);
-        }
+        processRequest(request, response);
     }
 
     /**
@@ -94,24 +77,21 @@ public class UsuarioController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        Usuario usuario = new Usuario();
-        usuario.setNome(request.getParameter("nome"));
-        usuario.setEmail(request.getParameter("email"));
-        usuario.setNivelAcesso(Integer.parseInt(request.getParameter("nivelAcesso")));
+        String email = request.getParameter("email");
         String senha = request.getParameter("senha");
 
-        String idStr = request.getParameter("id");
         UsuarioDAO dao = new UsuarioDAO();
-
         try {
-            if (idStr == null || idStr.isEmpty() || Integer.parseInt(idStr) == 0) {
-                usuario.setSenha(senha); // será hasheada no DAO
-                dao.inserir(usuario);
+            Usuario usuario = dao.autenticar(email, senha);
+            if (usuario != null) {
+                HttpSession sessao = request.getSession();
+                sessao.setAttribute("usuarioLogado", usuario);
+                response.sendRedirect("UsuarioController");
             } else {
-                usuario.setId(Integer.parseInt(idStr));
-                dao.atualizar(usuario);
+                request.setAttribute("mensagem", "Email ou senha inválidos");
+                RequestDispatcher rd = request.getRequestDispatcher("login.jsp");
+                rd.forward(request, response);
             }
-            response.sendRedirect("UsuarioController");
         } catch (Exception e) {
             throw new ServletException(e);
         }
